@@ -1,0 +1,30 @@
+# docker-compose.yml (GÜNCELLENMİŞ HALİ)
+
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    environment:
+      # Bağlantı adresini güncelledik, ?replicaSet=rs0 eklendi
+      - MONGODB_URI=mongodb://mongo:27017/superapp?replicaSet=rs0
+      - PORT=${APP_PORT}
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:latest
+    container_name: superapp_mongo # Container'a sabit bir isim verelim ki komutlarda kullanması kolay olsun
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    # YENİ EKLENEN KISIM: MongoDB'yi 'rs0' adında bir replica set ile başlat
+    command: mongod --replSet rs0 --bind_ip_all
+
+volumes:
+  mongo-data:
